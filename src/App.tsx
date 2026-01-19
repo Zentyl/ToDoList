@@ -1,3 +1,4 @@
+// UMOŻLIWIĆ EDYCJE KILKU NA RAZ
 import { useState } from 'react'
 
 import './App.css'
@@ -11,11 +12,13 @@ function App() {
   const [inputValue, setInputValue] = useState("");
   const [unfinished, setUnfinished] = useState<Note[]>([]);
   const [finished, setFinished] = useState<Note[]>([]);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [tempText, setTempText] = useState("");
 
   const addNote = () => {
     if (inputValue.trim() !== "") {
       const newNote: Note = {
-        id: Date.now(),
+        id: Date.now() + Math.floor(Math.random() * 100),
         text: inputValue
       };
       setUnfinished([...unfinished, newNote]);
@@ -32,17 +35,28 @@ function App() {
     }
   }
 
-  const deleteNote = (id: number, array: Note[]) => {
-    const noteToDelete = array.find(item => item.id === id)
+  const startEdit = (note: Note) => {
+    setEditingId(note.id);
+    setTempText(note.text);
+  }
 
-    if (noteToDelete) {
-      if (array === unfinished) {
-        setUnfinished(prev => prev.filter(item => item.id !== id));
-      }
-      else if (array === finished) {
-        setFinished(prev => prev.filter(item => item.id !== id));
-      }
-    }
+  const editNote = (id: number, newText: string, setTable: React.Dispatch<React.SetStateAction<Note[]>>) => {
+    setTable((prev) =>
+      prev.map((note) =>
+        note.id === id ? { ...note, text: newText } : note
+      )
+    );
+    setEditingId(null);
+    setTempText("");
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setTempText("");
+  }
+
+  const deleteNote = (id: number, setTable: React.Dispatch<React.SetStateAction<Note[]>>) => {
+    setTable(prev => prev.filter(item => item.id !== id));
   }
 
   return (
@@ -52,7 +66,7 @@ function App() {
           Dodaj zadanie
           <br></br>
           <textarea
-            className="border-2 rounded mt-2 placeholder:text-gray-500 focus:outline-none  p-2"
+            className="border-2 rounded mt-2 placeholder:text-gray-500 focus:outline-none p-2"
             placeholder='Wpisz tekst'
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
@@ -72,17 +86,46 @@ function App() {
                 <li key={note.id}>
                   <div className="flex flex-wrap sm:flex-nowrap justify-between gap-4 items-center mt-2">
                     <div className="flex-1 text-left ms-2 min-w-0">
-                      <p className="justify-start whitespace-normal break-normal">{note.text}</p>
+                      {editingId === note.id ? (
+                        <textarea
+                          className="border-2 rounded placeholder:text-gray-500 focus:outline-none p-2"
+                          placeholder='Wpisz tekst'
+                          value={tempText}
+                          onChange={(e) => setTempText(e.target.value)}
+                        />
+                      ) : (
+                        <p className="justify-start whitespace-normal break-normal"
+                          id={`paragraph-${note.id}`}>{note.text}</p>
+                      )}
                     </div>
                     <div className="justify-end shrink-0 flex gap-4">
-                      <button onClick={() => moveToFinished(note.id)}
-                        className=" hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
-                        Ukończ
-                      </button>
-                      <button onClick={() => deleteNote(note.id, unfinished)}
-                        className=" hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
-                        Usuń
-                      </button>
+                      {editingId === note.id ? (
+                        <>
+                          <button onClick={() => editNote(note.id, tempText, setUnfinished)}
+                            className=" hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
+                            Zapisz
+                          </button>
+                          <button onClick={() => cancelEdit()}
+                            className=" hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
+                            Anuluj
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button onClick={() => startEdit(note)}
+                            className=" hover:bg-yellow-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
+                            Edytuj
+                          </button>
+                          <button onClick={() => moveToFinished(note.id)}
+                            className=" hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
+                            Ukończ
+                          </button>
+                          <button onClick={() => deleteNote(note.id, setUnfinished)}
+                            className=" hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
+                            Usuń
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </li>
@@ -100,7 +143,7 @@ function App() {
                     <div className="flex-1 min-w-0 text-left ms-2">
                       <p className="justify-start whitespace-normal break-normal">{note.text}</p>
                     </div>
-                    <button onClick={() => deleteNote(note.id, finished)}
+                    <button onClick={() => deleteNote(note.id, setFinished)}
                       className="justify-end hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
                       Usuń
                     </button>
@@ -110,7 +153,7 @@ function App() {
             </ul>
           </div>
         </div>
-      </div>
+      </div >
     </>
   )
 }
