@@ -1,4 +1,3 @@
-// UMOŻLIWIĆ EDYCJE KILKU NA RAZ
 import { useState } from 'react'
 
 import './App.css'
@@ -6,25 +5,23 @@ import './App.css'
 interface Task {
   id: number;
   text: string;
-  status: boolean;
+  status: boolean; // false - nieukończone, true - ukończone
 }
 
 function App() {
   const [inputValue, setInputValue] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [tempText, setTempText] = useState("");
+  const [editingIds, setEditingIds] = useState<number[]>([]);
 
   const createTask = () => {
     if (inputValue.trim() !== "") {
       const newTask: Task = {
-        id: Date.now() + Math.floor(Math.random() * 100),
+        id: Math.floor((Date.now() + Math.random()) % 100000),
         text: inputValue,
         status: false
       };
       setTasks([...tasks, newTask]);
       setInputValue("");
-      console.log(newTask);
     }
   }
 
@@ -36,24 +33,24 @@ function App() {
     );
   }
 
-  const startEdit = (task: Task) => {
-    setEditingId(task.id);
-    setTempText(task.text);
+  const startEdit = (id: number) => {
+    if (!editingIds.includes(id)) {
+      setEditingIds(prev => [...prev, id]);
+    }
   }
 
   const editTask = (id: number, newText: string) => {
-    setTasks((prev) =>
-      prev.map((task) =>
+    setTasks(prev =>
+      prev.map(task =>
         task.id === id ? { ...task, text: newText } : task
       )
     );
-    setEditingId(null);
-    setTempText("");
   }
 
-  const cancelEdit = () => {
-    setEditingId(null);
-    setTempText("");
+  const stopEdit = (id: number, newText: string) => {
+    if (newText.trim() !== "") {
+      setEditingIds(prev => prev.filter(currentId => currentId !== id));
+    }
   }
 
   const deleteTask = (id: number) => {
@@ -63,12 +60,14 @@ function App() {
   return (
     <>
       <div className="mx-auto flex flex-col items-center max-w-sm">
+        <h1 className="text-4xl mb-4">To-Do List</h1>
         <label className="text-lg">
           Dodaj zadanie
           <br></br>
           <textarea
-            className="border-2 rounded mt-2 placeholder:text-gray-500 focus:outline-none p-2"
+            className="resize-none border-2 rounded mt-2 placeholder:text-gray-500 focus:outline-none p-2 w-full"
             placeholder='Wpisz tekst'
+            rows={3}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
           />
@@ -84,17 +83,17 @@ function App() {
           <div className="mb-2">
             <ul>
               {tasks
-                .filter((t) => !t.status)
+                .filter((task) => !task.status)
                 .map((task) => (
                   <li key={task.id}>
                     <div className="flex flex-wrap sm:flex-nowrap justify-between gap-4 items-center mt-2">
                       <div className="flex-1 text-left ms-2 min-w-0">
-                        {editingId === task.id ? (
+                        {editingIds.includes(task.id) ? (
                           <textarea
                             className="border-2 rounded placeholder:text-gray-500 focus:outline-none p-2"
-                            placeholder='Wpisz tekst'
-                            value={tempText}
-                            onChange={(e) => setTempText(e.target.value)}
+                            placeholder="Wpisz tekst"
+                            value={task.text}
+                            onChange={(e) => editTask(task.id, e.target.value)}
                           />
                         ) : (
                           <p className="justify-start whitespace-normal break-normal"
@@ -102,20 +101,20 @@ function App() {
                         )}
                       </div>
                       <div className="justify-end shrink-0 flex gap-4">
-                        {editingId === task.id ? (
+                        {editingIds.includes(task.id) ? (
                           <>
-                            <button onClick={() => editTask(task.id, tempText)}
+                            <button onClick={() => stopEdit(task.id, task.text)}
                               className=" hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
                               Zapisz
                             </button>
-                            <button onClick={() => cancelEdit()}
+                            <button onClick={() => stopEdit(task.id, task.text)}
                               className=" hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
                               Anuluj
                             </button>
                           </>
                         ) : (
                           <>
-                            <button onClick={() => startEdit(task)}
+                            <button onClick={() => startEdit(task.id)}
                               className=" hover:bg-yellow-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
                               Edytuj
                             </button>
@@ -141,7 +140,7 @@ function App() {
           <div className="mb-2">
             <ul>
               {tasks
-                .filter((t) => t.status)
+                .filter((task) => task.status)
                 .map((task) => (
                   <li key={task.id}>
                     <div className="flex justify-between gap-4 items-center mt-2">
