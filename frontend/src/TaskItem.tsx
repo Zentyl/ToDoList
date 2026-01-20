@@ -3,15 +3,15 @@ import type { Task } from './App';
 interface TaskItemProps {
     task: Task;
     isEditing: boolean;
-    onFinish: (id: number) => void;
+    onToggle: (id: number) => void;
     onDelete: (id: number) => void;
     onEdit: (id: number, text: string) => void;
     onStartEdit: (id: number) => void;
     onStopEdit: (id: number, text: string) => void;
-}
+};
 
 const TaskItem = ({
-    task, isEditing, onFinish, onDelete, onEdit, onStartEdit, onStopEdit
+    task, isEditing, onToggle, onDelete, onEdit, onStartEdit, onStopEdit
 }: TaskItemProps) => {
     return (
         <li key={task.id}>
@@ -48,7 +48,7 @@ const TaskItem = ({
                                     className=" hover:bg-yellow-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
                                     Edytuj </button>)}
 
-                            <button onClick={() => onFinish(task.id)}
+                            <button onClick={() => onToggle(task.id)}
                                 className={`${task.status ? "hover:bg-yellow-500" : "hover:bg-green-500"}  border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded`}>
                                 {task.status ? "Cofnij" : "Ukończ"}
                             </button>

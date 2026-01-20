@@ -16,13 +16,19 @@ function App() {
   const [editingIds, setEditingIds] = useState<number[]>([]);
 
   useEffect(() => {
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(data => setTasks(data))
-      .catch(err => console.error("Błąd pobierania:", err));
+    const fetchTasks = async () => {
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        setTasks(data);
+      } catch (error) {
+        console.error("Błąd pobierania: ", error);
+      }
+    };
+    fetchTasks();
   }, []);
 
-const createTask = async () => {
+  const createTask = async () => {
     if (inputValue.trim() === "") return;
 
     try {
@@ -31,28 +37,38 @@ const createTask = async () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: inputValue }),
       });
-      
+
       const newTask = await response.json();
       setTasks(prev => [...prev, newTask]);
       setInputValue("");
     } catch (error) {
       console.error("Nie udało się dodać zadania", error);
     }
-  }
+  };
 
-  const finishTask = (id: number) => {
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === id ? { ...task, status: !task.status } : task
-      )
-    );
-  }
+  const toggleStatus = async (id: number) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    try {
+      await fetch(`${API_URL}/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: !task.status }),
+      });
+      setTasks(prev =>
+        prev.map(
+          t => t.id === id ? { ...t, status: !t.status } : t));
+    } catch (error) {
+      console.error("Błąd aktualizacji statusu", error);
+    }
+  };
 
   const startEdit = (id: number) => {
     if (!editingIds.includes(id)) {
       setEditingIds(prev => [...prev, id]);
     }
-  }
+  };
 
   const editTask = (id: number, newText: string) => {
     setTasks(prev =>
@@ -60,17 +76,33 @@ const createTask = async () => {
         task.id === id ? { ...task, text: newText } : task
       )
     );
-  }
+  };
 
-  const stopEdit = (id: number, newText: string) => {
-    if (newText.trim() !== "") {
+  const stopEdit = async (id: number, newText: string) => {
+    if (newText.trim() === "") return;
+
+    try {
+      await fetch(`${API_URL}/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: newText }),
+      });
       setEditingIds(prev => prev.filter(currentId => currentId !== id));
-    }
-  }
+    } catch (error) {
+      console.error("Błąd zapisu tekstu", error);
+    };
+  };
 
-  const deleteTask = (id: number) => {
-    setTasks(prev => prev.filter(item => item.id !== id));
-  }
+  const deleteTask = async (id: number) => {
+    try {
+      await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+      });
+      setTasks(prev => prev.filter(item => item.id !== id));
+    } catch (error) {
+      console.error("Błąd usuwania", error);
+    }
+  };
 
   return (
     <>
@@ -104,7 +136,7 @@ const createTask = async () => {
                     key={task.id}
                     task={task}
                     isEditing={editingIds.includes(task.id)}
-                    onFinish={finishTask}
+                    onToggle={toggleStatus}
                     onDelete={deleteTask}
                     onEdit={editTask}
                     onStartEdit={startEdit}
@@ -125,7 +157,7 @@ const createTask = async () => {
                     key={task.id}
                     task={task}
                     isEditing={false}
-                    onFinish={finishTask}
+                    onToggle={toggleStatus}
                     onDelete={deleteTask}
                     onEdit={editTask}
                     onStartEdit={startEdit}
@@ -138,6 +170,6 @@ const createTask = async () => {
       </div >
     </>
   )
-}
+};
 
 export default App
