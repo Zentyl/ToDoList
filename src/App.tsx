@@ -3,47 +3,48 @@ import { useState } from 'react'
 
 import './App.css'
 
-interface Note {
+interface Task {
   id: number;
   text: string;
+  status: boolean;
 }
 
 function App() {
   const [inputValue, setInputValue] = useState("");
-  const [unfinished, setUnfinished] = useState<Note[]>([]);
-  const [finished, setFinished] = useState<Note[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [tempText, setTempText] = useState("");
 
-  const addNote = () => {
+  const createTask = () => {
     if (inputValue.trim() !== "") {
-      const newNote: Note = {
+      const newTask: Task = {
         id: Date.now() + Math.floor(Math.random() * 100),
-        text: inputValue
+        text: inputValue,
+        status: false
       };
-      setUnfinished([...unfinished, newNote]);
+      setTasks([...tasks, newTask]);
       setInputValue("");
+      console.log(newTask);
     }
   }
 
-  const moveToFinished = (id: number) => {
-    const noteToMove = unfinished.find(item => item.id === id);
-
-    if (noteToMove) {
-      setUnfinished(unfinished.filter(item => item.id !== id));
-      setFinished([...finished, noteToMove]);
-    }
+  const finishTask = (id: number) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id ? { ...task, status: !task.status } : task
+      )
+    );
   }
 
-  const startEdit = (note: Note) => {
-    setEditingId(note.id);
-    setTempText(note.text);
+  const startEdit = (task: Task) => {
+    setEditingId(task.id);
+    setTempText(task.text);
   }
 
-  const editNote = (id: number, newText: string, setTable: React.Dispatch<React.SetStateAction<Note[]>>) => {
-    setTable((prev) =>
-      prev.map((note) =>
-        note.id === id ? { ...note, text: newText } : note
+  const editTask = (id: number, newText: string) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id ? { ...task, text: newText } : task
       )
     );
     setEditingId(null);
@@ -55,8 +56,8 @@ function App() {
     setTempText("");
   }
 
-  const deleteNote = (id: number, setTable: React.Dispatch<React.SetStateAction<Note[]>>) => {
-    setTable(prev => prev.filter(item => item.id !== id));
+  const deleteTask = (id: number) => {
+    setTasks(prev => prev.filter(item => item.id !== id));
   }
 
   return (
@@ -72,7 +73,7 @@ function App() {
             onChange={(e) => setInputValue(e.target.value)}
           />
         </label>
-        <button onClick={addNote}
+        <button onClick={createTask}
           className="mt-2 hover:bg-blue-500 border-2 border-black hover:text-white text-black font-bold py-2 px-4 rounded">
           Zapisz
         </button>
@@ -82,54 +83,56 @@ function App() {
           <h1 className="text-lg">Nieukończone zadania</h1>
           <div className="mb-2">
             <ul>
-              {unfinished.map((note) => (
-                <li key={note.id}>
-                  <div className="flex flex-wrap sm:flex-nowrap justify-between gap-4 items-center mt-2">
-                    <div className="flex-1 text-left ms-2 min-w-0">
-                      {editingId === note.id ? (
-                        <textarea
-                          className="border-2 rounded placeholder:text-gray-500 focus:outline-none p-2"
-                          placeholder='Wpisz tekst'
-                          value={tempText}
-                          onChange={(e) => setTempText(e.target.value)}
-                        />
-                      ) : (
-                        <p className="justify-start whitespace-normal break-normal"
-                          id={`paragraph-${note.id}`}>{note.text}</p>
-                      )}
+              {tasks
+                .filter((t) => !t.status)
+                .map((task) => (
+                  <li key={task.id}>
+                    <div className="flex flex-wrap sm:flex-nowrap justify-between gap-4 items-center mt-2">
+                      <div className="flex-1 text-left ms-2 min-w-0">
+                        {editingId === task.id ? (
+                          <textarea
+                            className="border-2 rounded placeholder:text-gray-500 focus:outline-none p-2"
+                            placeholder='Wpisz tekst'
+                            value={tempText}
+                            onChange={(e) => setTempText(e.target.value)}
+                          />
+                        ) : (
+                          <p className="justify-start whitespace-normal break-normal"
+                            id={`paragraph-${task.id}`}>{task.text}</p>
+                        )}
+                      </div>
+                      <div className="justify-end shrink-0 flex gap-4">
+                        {editingId === task.id ? (
+                          <>
+                            <button onClick={() => editTask(task.id, tempText)}
+                              className=" hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
+                              Zapisz
+                            </button>
+                            <button onClick={() => cancelEdit()}
+                              className=" hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
+                              Anuluj
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => startEdit(task)}
+                              className=" hover:bg-yellow-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
+                              Edytuj
+                            </button>
+                            <button onClick={() => finishTask(task.id)}
+                              className=" hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
+                              Ukończ
+                            </button>
+                            <button onClick={() => deleteTask(task.id)}
+                              className=" hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
+                              Usuń
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <div className="justify-end shrink-0 flex gap-4">
-                      {editingId === note.id ? (
-                        <>
-                          <button onClick={() => editNote(note.id, tempText, setUnfinished)}
-                            className=" hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
-                            Zapisz
-                          </button>
-                          <button onClick={() => cancelEdit()}
-                            className=" hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
-                            Anuluj
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button onClick={() => startEdit(note)}
-                            className=" hover:bg-yellow-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
-                            Edytuj
-                          </button>
-                          <button onClick={() => moveToFinished(note.id)}
-                            className=" hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
-                            Ukończ
-                          </button>
-                          <button onClick={() => deleteNote(note.id, setUnfinished)}
-                            className=" hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
-                            Usuń
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                ))}
             </ul>
           </div>
         </div>
@@ -137,19 +140,21 @@ function App() {
           <h1 className="text-lg">Ukończone zadania</h1>
           <div className="mb-2">
             <ul>
-              {finished.map((note) => (
-                <li key={note.id}>
-                  <div className="flex justify-between gap-4 items-center mt-2">
-                    <div className="flex-1 min-w-0 text-left ms-2">
-                      <p className="justify-start whitespace-normal break-normal">{note.text}</p>
+              {tasks
+                .filter((t) => t.status)
+                .map((task) => (
+                  <li key={task.id}>
+                    <div className="flex justify-between gap-4 items-center mt-2">
+                      <div className="flex-1 min-w-0 text-left ms-2">
+                        <p className="justify-start whitespace-normal break-normal">{task.text}</p>
+                      </div>
+                      <button onClick={() => deleteTask(task.id)}
+                        className="justify-end hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
+                        Usuń
+                      </button>
                     </div>
-                    <button onClick={() => deleteNote(note.id, setFinished)}
-                      className="justify-end hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
-                      Usuń
-                    </button>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                ))}
             </ul>
           </div>
         </div>
