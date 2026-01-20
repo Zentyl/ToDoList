@@ -1,8 +1,29 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Task } from './task.entity';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+  constructor(
+    @InjectRepository(Task)
+    private taskRepository: Repository<Task>,
+  ) {}
+
+  getAllTasks(): Promise<Task[]> {
+    return this.taskRepository.find();
+  }
+
+  createTask(text: string): Promise<Task> {
+    const newTask = this.taskRepository.create({ text, status: false });
+    return this.taskRepository.save(newTask);
+  }
+
+  async updateTask(id: number, updates: Partial<Task>): Promise<void> {
+    await this.taskRepository.update(id, updates);
+  }
+
+  async deleteTask(id: number): Promise<void> {
+    await this.taskRepository.delete(id);
   }
 }

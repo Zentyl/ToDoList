@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import TaskItem from './TaskItem';
 import './App.css'
+
+const API_URL = 'http://localhost:3000/tasks';
 
 export interface Task {
   id: number;
@@ -13,15 +15,28 @@ function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [editingIds, setEditingIds] = useState<number[]>([]);
 
-  const createTask = () => {
-    if (inputValue.trim() !== "") {
-      const newTask: Task = {
-        id: Math.floor((Date.now() + Math.random()) % 100000),
-        text: inputValue,
-        status: false
-      };
-      setTasks([...tasks, newTask]);
+  useEffect(() => {
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(data => setTasks(data))
+      .catch(err => console.error("Błąd pobierania:", err));
+  }, []);
+
+const createTask = async () => {
+    if (inputValue.trim() === "") return;
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: inputValue }),
+      });
+      
+      const newTask = await response.json();
+      setTasks(prev => [...prev, newTask]);
       setInputValue("");
+    } catch (error) {
+      console.error("Nie udało się dodać zadania", error);
     }
   }
 

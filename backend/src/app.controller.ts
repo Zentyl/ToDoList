@@ -1,12 +1,27 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { AppService } from './app.service';
 
-@Controller()
+@Controller("tasks")
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly appService: AppService) { }
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  getTasks() {
+    return this.appService.getAllTasks();
+  }
+
+  @Post()
+  createTask(@Body("text") text: string) {
+    return this.appService.createTask(text);
+  }
+
+  @Patch(":id")
+  updateTask(@Param("id") id: string, @Body() body: any) {
+    return this.appService.updateTask(Number(id), body);
+  }
+
+  @Delete(":id")
+  deleteTask(@Param("id") id: string) {
+    return this.appService.deleteTask(Number(id));
   }
 }
