@@ -43,10 +43,10 @@ const TaskItem = ({
                         </>
                     ) : (
                         <>
-                            {task.status ?
-                                <></> : <button onClick={() => onStartEdit(task.id)}
+                            {!task.status && (
+                                <button onClick={() => onStartEdit(task.id)}
                                     className=" hover:bg-yellow-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
-                                    Edytuj </button>}
+                                    Edytuj </button>)}
 
                             <button onClick={() => onFinish(task.id)}
                                 className={`${task.status ? "hover:bg-yellow-500" : "hover:bg-green-500"}  border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded`}>
