@@ -1,8 +1,8 @@
 import { useState } from 'react'
-
+import TaskItem from './TaskItem';
 import './App.css'
 
-interface Task {
+export interface Task {
   id: number;
   text: string;
   status: boolean; // false - nieukończone, true - ukończone
@@ -85,52 +85,16 @@ function App() {
               {tasks
                 .filter((task) => !task.status)
                 .map((task) => (
-                  <li key={task.id}>
-                    <div className="flex flex-wrap sm:flex-nowrap justify-between gap-4 items-center mt-2">
-                      <div className="flex-1 text-left ms-2 min-w-0">
-                        {editingIds.includes(task.id) ? (
-                          <textarea
-                            className="border-2 rounded placeholder:text-gray-500 focus:outline-none p-2"
-                            placeholder="Wpisz tekst"
-                            value={task.text}
-                            onChange={(e) => editTask(task.id, e.target.value)}
-                          />
-                        ) : (
-                          <p className="justify-start whitespace-normal break-normal"
-                            id={`paragraph-${task.id}`}>{task.text}</p>
-                        )}
-                      </div>
-                      <div className="justify-end shrink-0 flex gap-4">
-                        {editingIds.includes(task.id) ? (
-                          <>
-                            <button onClick={() => stopEdit(task.id, task.text)}
-                              className=" hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
-                              Zapisz
-                            </button>
-                            <button onClick={() => stopEdit(task.id, task.text)}
-                              className=" hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
-                              Anuluj
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button onClick={() => startEdit(task.id)}
-                              className=" hover:bg-yellow-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
-                              Edytuj
-                            </button>
-                            <button onClick={() => finishTask(task.id)}
-                              className=" hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
-                              Ukończ
-                            </button>
-                            <button onClick={() => deleteTask(task.id)}
-                              className=" hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
-                              Usuń
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </li>
+                  <TaskItem
+                    key={task.id}
+                    task={task}
+                    isEditing={editingIds.includes(task.id)}
+                    onFinish={finishTask}
+                    onDelete={deleteTask}
+                    onEdit={editTask}
+                    onStartEdit={startEdit}
+                    onStopEdit={stopEdit}
+                  />
                 ))}
             </ul>
           </div>
@@ -142,17 +106,16 @@ function App() {
               {tasks
                 .filter((task) => task.status)
                 .map((task) => (
-                  <li key={task.id}>
-                    <div className="flex justify-between gap-4 items-center mt-2">
-                      <div className="flex-1 min-w-0 text-left ms-2">
-                        <p className="justify-start whitespace-normal break-normal">{task.text}</p>
-                      </div>
-                      <button onClick={() => deleteTask(task.id)}
-                        className="justify-end hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
-                        Usuń
-                      </button>
-                    </div>
-                  </li>
+                  <TaskItem
+                    key={task.id}
+                    task={task}
+                    isEditing={false}
+                    onFinish={finishTask}
+                    onDelete={deleteTask}
+                    onEdit={editTask}
+                    onStartEdit={startEdit}
+                    onStopEdit={stopEdit}
+                  />
                 ))}
             </ul>
           </div>
