@@ -9,5 +9,5 @@ export class Task {
     text: string;
 
     @Column({ default: false })
-    status: boolean;
+    finished: boolean;
 }

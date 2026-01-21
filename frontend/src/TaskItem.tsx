@@ -1,18 +1,21 @@
 import type { Task } from './App';
+import { useState } from "react";
 
 interface TaskItemProps {
     task: Task;
     isEditing: boolean;
     onToggle: (id: number) => void;
     onDelete: (id: number) => void;
-    onEdit: (id: number, text: string) => void;
     onStartEdit: (id: number) => void;
-    onStopEdit: (id: number, text: string) => void;
+    onSaveEdit: (id: number, text: string) => void;
+    onCancelEdit: (id: number) => void;
 };
 
 const TaskItem = ({
-    task, isEditing, onToggle, onDelete, onEdit, onStartEdit, onStopEdit
+    task, isEditing, onToggle, onDelete, onStartEdit, onSaveEdit, onCancelEdit
 }: TaskItemProps) => {
+    const [tempText, setTempText] = useState(task.text);
+
     return (
         <li key={task.id}>
             <div className="flex flex-wrap sm:flex-nowrap justify-between gap-4 items-center mt-2">
@@ -21,8 +24,8 @@ const TaskItem = ({
                         <textarea
                             className="border-2 rounded placeholder:text-gray-500 focus:outline-none p-2"
                             placeholder="Wpisz tekst"
-                            value={task.text}
-                            onChange={(e) => onEdit(task.id, e.target.value)}
+                            value={tempText}
+                            onChange={(e) => setTempText(e.target.value)}
                         />
                     ) : (
                         <p className="justify-start whitespace-normal break-normal">
@@ -32,25 +35,28 @@ const TaskItem = ({
                 <div className="justify-end shrink-0 flex gap-4">
                     {isEditing ? (
                         <>
-                            <button onClick={() => onStopEdit(task.id, task.text)}
+                            <button onClick={() => onSaveEdit(task.id, tempText)}
                                 className=" hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
                                 Zapisz
                             </button>
-                            <button onClick={() => onStopEdit(task.id, task.text)}
+                            <button onClick={() => {
+                                setTempText(task.text);
+                                onCancelEdit(task.id);
+                            }}
                                 className=" hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
                                 Anuluj
                             </button>
                         </>
                     ) : (
                         <>
-                            {!task.status && (
+                            {!task.finished && (
                                 <button onClick={() => onStartEdit(task.id)}
                                     className=" hover:bg-yellow-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
                                     Edytuj </button>)}
 
                             <button onClick={() => onToggle(task.id)}
-                                className={`${task.status ? "hover:bg-yellow-500" : "hover:bg-green-500"}  border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded`}>
-                                {task.status ? "Cofnij" : "Ukończ"}
+                                className={`${task.finished ? "hover:bg-yellow-500" : "hover:bg-green-500"}  border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded`}>
+                                {task.finished ? "Cofnij" : "Ukończ"}
                             </button>
                             <button onClick={() => onDelete(task.id)}
                                 className=" hover:bg-red-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">

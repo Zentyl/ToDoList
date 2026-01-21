@@ -15,7 +15,7 @@ export class AppService {
   }
 
   createTask(text: string): Promise<Task> {
-    const newTask = this.taskRepository.create({ text, status: false });
+    const newTask = this.taskRepository.create({ text, finished: false });
     return this.taskRepository.save(newTask);
   }
 
