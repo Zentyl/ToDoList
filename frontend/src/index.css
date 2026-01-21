@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+#datePicker .react-datetime-picker__wrapper {
+  padding: 4px 8px;
+  border-radius: 4px;
+}

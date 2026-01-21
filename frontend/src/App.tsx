@@ -1,10 +1,12 @@
+// Do zrobienia edycja daty i szerokość podczas znikającego buttona
+
 import { useState, useEffect } from 'react'
 import TaskItem from './TaskItem';
 import DateTimePicker from 'react-datetime-picker'
 import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
 import 'react-clock/dist/Clock.css';
-import './App.css'
+import './index.css'
 
 const API_URL = 'http://localhost:3000/tasks';
 
@@ -125,14 +127,14 @@ function App() {
           <h1 className="text-4xl mb-4">To-Do List</h1>
           <label className="text-lg flex flex-col">
             Dodaj zadanie
-            <textarea
-              className="resize-none border-2 rounded mt-2 placeholder:text-gray-500 focus:outline-none p-2 w-full"
-              placeholder='Wpisz tekst'
-              rows={3}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-            />
           </label>
+          <textarea
+            className="resize-none border-2 rounded mt-2 placeholder:text-gray-500 focus:outline-none p-2 w-3/4"
+            placeholder='Wpisz tekst'
+            rows={3}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+          />
           <div className="m-2 flex gap-2">
             Data i godzina wykonania
             <input
@@ -142,7 +144,7 @@ function App() {
             </input>
           </div>
           <DateTimePicker onChange={onChangeDate} id="datePicker" value={dateValue}
-            disableClock format="dd.MMy HH:mm" openWidgetsOnFocus={false}
+            disableClock format="dd.MM.y HH:mm" openWidgetsOnFocus={false}
             disabled={isDateDisabled}
           />
           <button onClick={createTask}
