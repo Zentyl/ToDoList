@@ -1,16 +1,26 @@
 import { useState, useEffect } from 'react'
 import TaskItem from './TaskItem';
+import DateTimePicker from 'react-datetime-picker'
+import 'react-datetime-picker/dist/DateTimePicker.css';
+import 'react-calendar/dist/Calendar.css';
+import 'react-clock/dist/Clock.css';
 import './App.css'
 
 const API_URL = 'http://localhost:3000/tasks';
+
+type DateValue = Date | null;
+type DateRange = DateValue | [DateValue, DateValue];
 
 export interface Task {
   id: number;
   text: string;
   finished: boolean;
+  date: Date;
 }
 
 function App() {
+  const [isDateDisabled, setIsDateDisabled] = useState(false);
+  const [dateValue, onChangeDate] = useState<DateRange>(new Date());
   const [inputValue, setInputValue] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [editingIds, setEditingIds] = useState<number[]>([]);
@@ -35,7 +45,10 @@ function App() {
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: inputValue }),
+        body: JSON.stringify({
+          text: inputValue,
+          date: isDateDisabled ? null : dateValue
+        }),
       });
 
       const newTask = await response.json();
@@ -120,8 +133,20 @@ function App() {
               onChange={(e) => setInputValue(e.target.value)}
             />
           </label>
+          <div className="m-2 flex gap-2">
+            Data i godzina wykonania
+            <input
+              type="checkbox"
+              onChange={(e) => setIsDateDisabled(e.target.checked)}
+            >
+            </input>
+          </div>
+          <DateTimePicker onChange={onChangeDate} id="datePicker" value={dateValue}
+            disableClock format="dd.MMy HH:mm" openWidgetsOnFocus={false}
+            disabled={isDateDisabled}
+          />
           <button onClick={createTask}
-            className="mt-2 hover:bg-blue-500 border-2 border-black hover:text-white text-black font-bold py-2 px-4 rounded">
+            className="mt-4 hover:bg-blue-500 border-2 border-black hover:text-white text-black font-bold py-2 px-4 rounded">
             Zapisz
           </button>
         </div>
@@ -169,7 +194,7 @@ function App() {
             </div>
           </div>
         </div>
-      </div>
+      </div >
     </>
   )
 };

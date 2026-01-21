@@ -10,4 +10,7 @@ export class Task {
 
     @Column({ default: false })
     finished: boolean;
+
+    @Column({type: 'datetime', nullable: true})
+    date: Date;
 }

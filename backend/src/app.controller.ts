@@ -11,8 +11,11 @@ export class AppController {
   }
 
   @Post()
-  createTask(@Body("text") text: string) {
-    return this.appService.createTask(text);
+  createTask(
+    @Body("text") text: string,
+    @Body("date") date: Date) {
+    const taskDate = date;
+    return this.appService.createTask(text, taskDate);
   }
 
   @Patch(":id")

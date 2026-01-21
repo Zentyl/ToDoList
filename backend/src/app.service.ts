@@ -14,8 +14,8 @@ export class AppService {
     return this.taskRepository.find();
   }
 
-  createTask(text: string): Promise<Task> {
-    const newTask = this.taskRepository.create({ text, finished: false });
+  createTask(text: string, date: Date): Promise<Task> {
+    const newTask = this.taskRepository.create({ text, finished: false , date });
     return this.taskRepository.save(newTask);
   }
 
