@@ -1,5 +1,3 @@
-// Do zrobienia edycja daty i szerokość podczas znikającego buttona
-
 import { useState, useEffect, useRef } from 'react'
 import TaskItem from './TaskItem';
 import DateTimePicker from 'react-datetime-picker'
@@ -10,14 +8,14 @@ import './index.css'
 
 const API_URL = 'http://localhost:3000/tasks';
 
-type DateValue = Date | null;
-type DateRange = DateValue | [DateValue, DateValue];
+export type DateValue = Date | null;
+export type DateRange = DateValue | [DateValue, DateValue];
 
 export interface Task {
   id: number;
   text: string;
   finished: boolean;
-  date: Date;
+  date: Date | null;
 }
 
 function App() {
@@ -29,7 +27,6 @@ function App() {
   const newTaskInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    adjustNewTaskInputHeight();
     const fetchTasks = async () => {
       try {
         const response = await fetch(API_URL);
@@ -40,6 +37,10 @@ function App() {
       }
     };
     fetchTasks();
+  }, []);
+
+  useEffect(() => {
+    adjustNewTaskInputHeight();
   }, [inputValue]);
 
   const createTask = async () => {
@@ -99,18 +100,21 @@ function App() {
     setEditingIds(prev => prev.filter(currentId => currentId !== id));
   }
 
-  const saveEdit = async (id: number, newText: string) => {
+  const saveEdit = async (id: number, newText: string, newDate: Date | null) => {
     if (newText.trim() === "") return;
 
     try {
       await fetch(`${API_URL}/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: newText }),
+        body: JSON.stringify({
+          text: newText,
+          date: newDate
+        }),
       });
       setTasks(prev =>
         prev.map(task =>
-          task.id === id ? { ...task, text: newText } : task
+          task.id === id ? { ...task, text: newText, date: newDate } : task
         )
       );
       setEditingIds(prev => prev.filter(currentId => currentId !== id));

@@ -1,5 +1,10 @@
 import type { Task } from './App';
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import DateTimePicker from 'react-datetime-picker'
+import 'react-datetime-picker/dist/DateTimePicker.css';
+import 'react-calendar/dist/Calendar.css';
+import 'react-clock/dist/Clock.css';
+import './index.css'
 
 interface TaskItemProps {
     task: Task;
@@ -7,7 +12,7 @@ interface TaskItemProps {
     onToggle: (id: number) => void;
     onDelete: (id: number) => void;
     onStartEdit: (id: number) => void;
-    onSaveEdit: (id: number, text: string) => void;
+    onSaveEdit: (id: number, text: string, date: Date | null) => void;
     onCancelEdit: (id: number) => void;
 };
 
@@ -18,6 +23,8 @@ const TaskItem = ({
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [savedHeight, setSavedHeight] = useState<number | undefined>(undefined);
     const [tempText, setTempText] = useState(task.text);
+    const [isDateDisabled, setIsDateDisabled] = useState(false);
+    const [tempDate, setTempDate] = useState<Date | null>(task.date ? new Date(task.date) : null);
 
     const adjustHeight = () => {
         const textarea = textareaRef.current;
@@ -35,6 +42,7 @@ const TaskItem = ({
 
     useEffect(() => {
         if (isEditing) {
+            setIsDateDisabled(true);
             if (textareaRef.current && savedHeight) {
                 textareaRef.current.style.height = `${savedHeight}px`;
 
@@ -44,6 +52,9 @@ const TaskItem = ({
             } else {
                 adjustHeight();
             }
+        }
+        else {
+            setIsDateDisabled(false);
         }
     }, [tempText, isEditing, savedHeight]);
 
@@ -70,14 +81,20 @@ const TaskItem = ({
                                 {task.text}</p>
                         </div>
                     )}
-                    <p className="mt-2 justify-start border-t-2 whitespace-normal break-normal">
-                        {task.date ? `Termin: ${new Date(task.date).toLocaleString('pl-PL')}` : "Brak terminu"}
-                    </p>
+                    {task.date || isEditing ?
+                        <DateTimePicker onChange={(val: any) => setTempDate(val)}
+                            id="dateEdit" value={tempDate}
+                            disableClock format="dd.MM.y HH:mm" openWidgetsOnFocus={false} disableCalendar={!isDateDisabled}
+                            disabled={!isDateDisabled} clearIcon={!isDateDisabled ? null : undefined}
+                            className="mt-2 w-full justify-start border-t-2 border-t-black whitespace-normal break-normal"
+                        />
+                        : <p className="mt-2 w-full justify-start border-t-2 border-t-black whitespace-normal break-normal">Brak terminu</p>}
+
                 </div>
                 <div className="justify-end shrink-0 flex gap-4">
                     {isEditing ? (
                         <>
-                            <button onClick={() => onSaveEdit(task.id, tempText)}
+                            <button onClick={() => onSaveEdit(task.id, tempText, tempDate)}
                                 className=" hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-3 rounded">
                                 Zapisz
                             </button>
