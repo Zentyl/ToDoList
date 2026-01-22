@@ -1,6 +1,6 @@
 // Do zrobienia edycja daty i szerokość podczas znikającego buttona
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import TaskItem from './TaskItem';
 import DateTimePicker from 'react-datetime-picker'
 import 'react-datetime-picker/dist/DateTimePicker.css';
@@ -26,8 +26,10 @@ function App() {
   const [inputValue, setInputValue] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [editingIds, setEditingIds] = useState<number[]>([]);
+  const newTaskInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
+    adjustNewTaskInputHeight();
     const fetchTasks = async () => {
       try {
         const response = await fetch(API_URL);
@@ -38,7 +40,7 @@ function App() {
       }
     };
     fetchTasks();
-  }, []);
+  }, [inputValue]);
 
   const createTask = async () => {
     if (inputValue.trim() === "") return;
@@ -76,6 +78,14 @@ function App() {
           t => t.id === id ? { ...t, finished: !t.finished } : t));
     } catch (error) {
       console.error("Błąd aktualizacji statusu", error);
+    }
+  };
+
+  const adjustNewTaskInputHeight = () => {
+    const el = newTaskInputRef.current;
+    if (el) {
+      el.style.height = "auto";
+      el.style.height = `${el.scrollHeight}px`;
     }
   };
 
@@ -129,6 +139,8 @@ function App() {
             Dodaj zadanie
           </label>
           <textarea
+            ref={newTaskInputRef}
+            onInput={adjustNewTaskInputHeight}
             className="resize-none border-2 rounded mt-2 placeholder:text-gray-500 focus:outline-none p-2 w-3/4"
             placeholder='Wpisz tekst'
             rows={3}
@@ -184,7 +196,7 @@ function App() {
                     <TaskItem
                       key={task.id}
                       task={task}
-                      isEditing={false}
+                      isEditing={editingIds.includes(task.id)}
                       onToggle={toggleFinished}
                       onDelete={deleteTask}
                       onStartEdit={startEdit}
