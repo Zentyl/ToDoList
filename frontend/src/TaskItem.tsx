@@ -45,7 +45,6 @@ const TaskItem = ({
             setIsDateDisabled(true);
             if (textareaRef.current && savedHeight) {
                 textareaRef.current.style.height = `${savedHeight}px`;
-
                 if (textareaRef.current.scrollHeight > savedHeight) {
                     adjustHeight();
                 }
@@ -85,21 +84,23 @@ const TaskItem = ({
                         <DateTimePicker onChange={(val: any) => setTempDate(val)}
                             id="dateEdit" value={tempDate}
                             disableClock format="dd.MM.y HH:mm" openWidgetsOnFocus={false} disableCalendar={!isDateDisabled}
-                            disabled={!isDateDisabled} clearIcon={!isDateDisabled ? null : undefined}
+                            disabled={!isDateDisabled} clearIcon={!isDateDisabled ? null : undefined} 
                             className="mt-2 w-full justify-start border-t-2 border-t-black whitespace-normal break-normal"
                         />
-                        : <p className="mt-2 w-full justify-start border-t-2 border-t-black whitespace-normal break-normal">Brak terminu</p>}
+                        : <p className="mt-2 mb-1 w-full justify-start border-t-2 border-t-black whitespace-normal break-normal">Brak terminu</p>}
 
                 </div>
                 <div className="justify-end shrink-0 flex gap-4">
                     {isEditing ? (
                         <>
                             <button onClick={() => onSaveEdit(task.id, tempText, tempDate)}
-                                className=" hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-3 rounded">
+                                className=" hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-3.25 rounded">
                                 Zapisz
                             </button>
+
                             <button onClick={() => {
                                 setTempText(task.text);
+                                setTempDate(task.date);
                                 onCancelEdit(task.id);
                             }}
                                 className=" hover:bg-yellow-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 px-2 rounded">
@@ -113,7 +114,8 @@ const TaskItem = ({
                     ) : (
                         <>
                             <button onClick={() => onToggle(task.id)}
-                                className={`${task.finished ? "px-[0.84375rem]" : "px-2"} hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 rounded`}>
+                                className={`${task.finished ? "px-[0.9rem]" : "px-[0.56rem]"}
+                                hover:bg-green-500 border-2 max-w-fit border-black hover:text-white text-black font-bold py-1 rounded`}>
                                 {task.finished ? "Cofnij" : "Ukończ"}
                             </button>
                             <button onClick={() => onStartEdit(task.id)}

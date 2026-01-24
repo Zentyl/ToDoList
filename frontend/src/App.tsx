@@ -8,8 +8,8 @@ import './index.css'
 
 const API_URL = 'http://localhost:3000/tasks';
 
-export type DateValue = Date | null;
-export type DateRange = DateValue | [DateValue, DateValue];
+type DateValue = Date | null;
+type DateRange = DateValue | [DateValue, DateValue];
 
 export interface Task {
   id: number;
