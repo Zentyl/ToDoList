@@ -16,12 +16,14 @@ export interface Task {
   text: string;
   finished: boolean;
   date: Date | null;
+  priority: number;
 }
 
 function App() {
   const [isDateDisabled, setIsDateDisabled] = useState(false);
   const [dateValue, onChangeDate] = useState<DateRange>(new Date());
   const [inputValue, setInputValue] = useState("");
+  const [priority, setPriority] = useState<number | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [editingIds, setEditingIds] = useState<number[]>([]);
   const newTaskInputRef = useRef<HTMLTextAreaElement>(null);
@@ -52,7 +54,8 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text: inputValue,
-          date: isDateDisabled ? null : dateValue
+          date: isDateDisabled ? null : dateValue,
+          priority: priority ?? 1
         }),
       });
 
@@ -63,6 +66,7 @@ function App() {
       console.error("Nie udało się dodać zadania", error);
     }
   };
+
 
   const toggleFinished = async (id: number) => {
     const task = tasks.find(t => t.id === id);
@@ -100,7 +104,7 @@ function App() {
     setEditingIds(prev => prev.filter(currentId => currentId !== id));
   }
 
-  const saveEdit = async (id: number, newText: string, newDate: Date | null) => {
+  const saveEdit = async (id: number, newText: string, newDate: Date | null, priority: number) => {
     if (newText.trim() === "") return;
 
     try {
@@ -109,12 +113,13 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text: newText,
-          date: newDate
+          date: newDate,
+          priority: priority
         }),
       });
       setTasks(prev =>
         prev.map(task =>
-          task.id === id ? { ...task, text: newText, date: newDate } : task
+          task.id === id ? { ...task, text: newText, date: newDate, priority: priority} : task
         )
       );
       setEditingIds(prev => prev.filter(currentId => currentId !== id));
@@ -136,7 +141,7 @@ function App() {
 
   return (
     <>
-      <div className="max-w-7xl p-8 mx-auto text-center">
+      <div className="max-w-7xl py-8 px-4 mx-auto text-center">
         <div className="mx-auto flex flex-col items-center max-w-sm">
           <h1 className="text-4xl mb-4">To-Do List</h1>
           <label className="text-lg flex flex-col">
@@ -163,6 +168,24 @@ function App() {
             disableClock format="dd.MM.y HH:mm" openWidgetsOnFocus={false}
             disabled={isDateDisabled}
           />
+          <div className="dropdown">
+            <div tabIndex={0} role="button" className="select-none mt-4 hover:bg-orange-500 border-2 border-black hover:text-white text-black px-2 py-1 rounded">Priorytet {priority ?? 1}</div>
+            <ul tabIndex={-1} className="dropdown-content menu bg-base-100 rounded-box z-1 w-max p-2 shadow-sm">
+              {[1, 2, 3, 4].map((num) => (
+                <li key={num}>
+                  <a
+                    className="whitespace-nowrap"
+                    onClick={() => {
+                      setPriority(num);
+                      (document.activeElement as HTMLElement).blur();
+                    }}
+                  >
+                    Priorytet {num}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
           <button onClick={createTask}
             className="mt-4 hover:bg-blue-500 border-2 border-black hover:text-white text-black font-bold py-2 px-4 rounded">
             Zapisz

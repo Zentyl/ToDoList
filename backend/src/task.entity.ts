@@ -13,4 +13,7 @@ export class Task {
 
     @Column({type: 'datetime', nullable: true})
     date: Date;
+
+    @Column({ default: 1 })
+    priority: number;
 }

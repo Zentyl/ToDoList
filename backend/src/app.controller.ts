@@ -13,9 +13,10 @@ export class AppController {
   @Post()
   createTask(
     @Body("text") text: string,
+    @Body("priority") priority: number,
     @Body("date") date: Date) {
     const taskDate = date;
-    return this.appService.createTask(text, taskDate);
+    return this.appService.createTask(text, taskDate, priority);
   }
 
   @Patch(":id")
