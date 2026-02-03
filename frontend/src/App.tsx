@@ -20,6 +20,7 @@ export interface Task {
 }
 
 function App() {
+  const [theme, setTheme] = useState("business");
   const [isDateDisabled, setIsDateDisabled] = useState(false);
   const [dateValue, onChangeDate] = useState<DateRange>(new Date());
   const [inputValue, setInputValue] = useState("");
@@ -27,6 +28,10 @@ function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [editingIds, setEditingIds] = useState<number[]>([]);
   const newTaskInputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    document.querySelector('html')?.setAttribute('data-theme', theme);
+  }, [theme]);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -44,6 +49,10 @@ function App() {
   useEffect(() => {
     adjustNewTaskInputHeight();
   }, [inputValue]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === "business" ? "light" : "business");
+  };
 
   const createTask = async () => {
     if (inputValue.trim() === "") return;
@@ -94,17 +103,14 @@ function App() {
     }
   };
 
-  const startEdit = (id: number) => {
-    if (!editingIds.includes(id)) {
-      setEditingIds(prev => [...prev, id]);
-    }
+  const enableEdit = (id: number) => {
+    setEditingIds(prev => {
+      if (prev.includes(id)) return prev;
+      return [...prev, id];
+    });
   };
 
-  const cancelEdit = (id: number) => {
-    setEditingIds(prev => prev.filter(currentId => currentId !== id));
-  }
-
-  const saveEdit = async (id: number, newText: string, newDate: Date | null, priority: number) => {
+  const editTask = async (id: number, newText: string, newDate: Date | null, priority: number) => {
     if (newText.trim() === "") return;
 
     try {
@@ -119,7 +125,7 @@ function App() {
       });
       setTasks(prev =>
         prev.map(task =>
-          task.id === id ? { ...task, text: newText, date: newDate, priority: priority} : task
+          task.id === id ? { ...task, text: newText, date: newDate, priority: priority } : task
         )
       );
       setEditingIds(prev => prev.filter(currentId => currentId !== id));
@@ -141,7 +147,12 @@ function App() {
 
   return (
     <>
-      <div className="max-w-7xl py-8 px-4 mx-auto text-center">
+      <div className="min-h-screen bg-base-100 max-w-7xl py-8 px-4 mx-auto text-center">
+        <div className="absolute top-4 right-4">
+          <button onClick={toggleTheme} className="btn btn-ghost">
+            {theme === 'business' ? 'Tryb jasny' : 'Tryb ciemny'}
+          </button>
+        </div>
         <div className="mx-auto flex flex-col items-center max-w-sm">
           <h1 className="text-4xl mb-4">To-Do List</h1>
           <label className="text-lg flex flex-col">
@@ -169,7 +180,7 @@ function App() {
             disabled={isDateDisabled}
           />
           <div className="dropdown">
-            <div tabIndex={0} role="button" className="select-none mt-4 hover:bg-orange-500 border-2 border-black hover:text-white text-black px-2 py-1 rounded">Priorytet {priority ?? 1}</div>
+            <div tabIndex={0} role="button" className="btn btn-accent select-none mt-4 px-2 py-1 rounded">Priorytet {priority ?? 1}</div>
             <ul tabIndex={-1} className="dropdown-content menu bg-base-100 rounded-box z-1 w-max p-2 shadow-sm">
               {[1, 2, 3, 4].map((num) => (
                 <li key={num}>
@@ -187,12 +198,12 @@ function App() {
             </ul>
           </div>
           <button onClick={createTask}
-            className="mt-4 hover:bg-blue-500 border-2 border-black hover:text-white text-black font-bold py-2 px-4 rounded">
+            className="btn btn-info mt-4 py-2 px-4 rounded">
             Zapisz
           </button>
         </div>
         <div className="flex items-start flex-col lg:flex-row gap-4 mt-2 pt-2">
-          <div className="border-black border-2 rounded w-full lg:w-1/2 px-2 pt-4 pb-2 min-w-0">
+          <div className="border-2 rounded w-full lg:w-1/2 px-2 pt-4 pb-2 min-w-0">
             <h1 className="text-lg">Nieukończone zadania</h1>
             <div className="mb-2">
               <ul>
@@ -205,15 +216,14 @@ function App() {
                       isEditing={editingIds.includes(task.id)}
                       onToggle={toggleFinished}
                       onDelete={deleteTask}
-                      onStartEdit={startEdit}
-                      onSaveEdit={saveEdit}
-                      onCancelEdit={cancelEdit}
+                      onEdit={editTask}
+                      onEnable={enableEdit}
                     />
                   ))}
               </ul>
             </div>
           </div>
-          <div className="border-black border-2 rounded w-full lg:w-1/2 px-2 pt-4 pb-2 min-w-0">
+          <div className="border-2 rounded w-full lg:w-1/2 px-2 pt-4 pb-2 min-w-0">
             <h1 className="text-lg">Ukończone zadania</h1>
             <div className="mb-2">
               <ul>
@@ -226,16 +236,15 @@ function App() {
                       isEditing={editingIds.includes(task.id)}
                       onToggle={toggleFinished}
                       onDelete={deleteTask}
-                      onStartEdit={startEdit}
-                      onSaveEdit={saveEdit}
-                      onCancelEdit={cancelEdit}
+                      onEdit={editTask}
+                      onEnable={enableEdit}
                     />
                   ))}
               </ul>
             </div>
           </div>
         </div>
-      </div >
+      </div>
     </>
   )
 };
