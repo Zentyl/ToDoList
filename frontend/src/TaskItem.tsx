@@ -68,6 +68,7 @@ const TaskItem = ({
                     {isEditing ? (
                         <textarea
                             ref={textareaRef}
+                            autoFocus
                             onFocus={adjustHeight}
                             onBlur={handleSave}
                             onKeyDown={(e) => {
@@ -119,7 +120,7 @@ const TaskItem = ({
                     <div className="dropdown">
                         <div tabIndex={isDisabled ? 0 : -1}
                             role="button"
-                            className="mt-2 border-2 px-2 py-1 rounded btn btn-accent select-none cursor-pointer"
+                            className="mt-2 border-2 px-2 py-1 rounded btn btn-outline btn-accent select-none cursor-pointer"
                         >Priorytet {tempPriority}</div>
                         <ul tabIndex={-1} className="dropdown-content menu bg-base-100 rounded-box z-1 w-max p-2 shadow-sm">
                             {[1, 2, 3, 4].map((num) => (
@@ -144,11 +145,11 @@ const TaskItem = ({
                 <div>
                     <div className="justify-end shrink-0 flex gap-4">
                         <button onClick={() => onToggle(task.id)}
-                            className={`btn ${task.finished ? 'btn-warning' : 'btn-success'} py-1 px-3.25 rounded cursor-pointer`}>
+                            className={`btn btn-outline ${task.finished ? 'btn-warning' : 'btn-success'} py-1 px-3.25 rounded cursor-pointer`}>
                             {task.finished ? "Cofnij" : "Ukończ"}
                         </button>
                         <button onClick={() => onDelete(task.id)}
-                            className=" btn btn-error max-w-fit py-1 px-2 rounded cursor-pointer">
+                            className=" btn btn-outline btn-error max-w-fit py-1 px-2 rounded cursor-pointer">
                             Usuń
                         </button>
                     </div>

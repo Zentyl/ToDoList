@@ -146,10 +146,10 @@ function App() {
   };
 
   return (
-    <>
-      <div className="min-h-screen bg-base-100 max-w-7xl py-8 px-4 mx-auto text-center">
+    <div className="min-h-screen bg-base-200 w-full transition-all duration-300 **:transition-all **:duration-300">
+      <div className="min-h-screen max-w-7xl py-8 px-4 mx-auto text-center">
         <div className="absolute top-4 right-4">
-          <button onClick={toggleTheme} className="btn btn-ghost">
+          <button onClick={toggleTheme} className="btn btn-outline btn-secondary">
             {theme === 'business' ? 'Tryb jasny' : 'Tryb ciemny'}
           </button>
         </div>
@@ -161,7 +161,7 @@ function App() {
           <textarea
             ref={newTaskInputRef}
             onInput={adjustNewTaskInputHeight}
-            className="resize-none border-2 rounded mt-2 placeholder:text-gray-500 focus:outline-none p-2 w-3/4"
+            className="resize-none border-2 rounded mt-2 focus:outline-none p-2 w-3/4"
             placeholder='Wpisz tekst'
             rows={3}
             value={inputValue}
@@ -180,7 +180,7 @@ function App() {
             disabled={isDateDisabled}
           />
           <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn btn-accent select-none mt-4 px-2 py-1 rounded">Priorytet {priority ?? 1}</div>
+            <div tabIndex={0} role="button" className="btn btn-outline btn-accent select-none mt-4 px-2 py-1 rounded">Priorytet {priority ?? 1}</div>
             <ul tabIndex={-1} className="dropdown-content menu bg-base-100 rounded-box z-1 w-max p-2 shadow-sm">
               {[1, 2, 3, 4].map((num) => (
                 <li key={num}>
@@ -198,12 +198,12 @@ function App() {
             </ul>
           </div>
           <button onClick={createTask}
-            className="btn btn-info mt-4 py-2 px-4 rounded">
+            className="btn btn-outline btn-info mt-4 py-2 px-4 rounded">
             Zapisz
           </button>
         </div>
-        <div className="flex items-start flex-col lg:flex-row gap-4 mt-2 pt-2">
-          <div className="border-2 rounded w-full lg:w-1/2 px-2 pt-4 pb-2 min-w-0">
+        <div className="flex items-start flex-col lg:flex-row gap-4 mt-4">
+          <div className="bg-base-100 border-2 rounded w-full lg:w-1/2 px-2 pt-4 pb-2 min-w-0">
             <h1 className="text-lg">Nieukończone zadania</h1>
             <div className="mb-2">
               <ul>
@@ -223,7 +223,7 @@ function App() {
               </ul>
             </div>
           </div>
-          <div className="border-2 rounded w-full lg:w-1/2 px-2 pt-4 pb-2 min-w-0">
+          <div className="bg-base-100 border-2 rounded w-full lg:w-1/2 px-2 pt-4 pb-2 min-w-0">
             <h1 className="text-lg">Ukończone zadania</h1>
             <div className="mb-2">
               <ul>
@@ -245,7 +245,7 @@ function App() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 };
 
