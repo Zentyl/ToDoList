@@ -1,10 +1,13 @@
-import type { Task } from './App';
+import type { Task } from '../types';
+import {
+    PRIORITY_BTN_STYLES, PRIORITY_BORDER_STYLES,
+    PRIORITY_TEXT_STYLES, PRIORITY_HOVER_BG_STYLES
+} from '../config/constants';
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import DateTimePicker from 'react-datetime-picker'
 import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
 import 'react-clock/dist/Clock.css';
-import './index.css'
 
 interface TaskItemProps {
     task: Task;
@@ -120,13 +123,15 @@ const TaskItem = ({
                     <div className="dropdown">
                         <div tabIndex={isDisabled ? 0 : -1}
                             role="button"
-                            className="mt-2 border-2 px-2 py-1 rounded btn btn-outline btn-accent select-none cursor-pointer"
+                            className={`btn btn-outline mt-2 border px-3 rounded select-none cursor-pointer ${PRIORITY_BTN_STYLES[tempPriority]}`}
                         >Priorytet {tempPriority}</div>
                         <ul tabIndex={-1} className="dropdown-content menu bg-base-100 rounded-box z-1 w-max p-2 shadow-sm">
                             {[1, 2, 3, 4].map((num) => (
                                 <li key={num}>
                                     <a
-                                        className="whitespace-nowrap"
+                                        className={`whitespace-nowrap border my-1
+                                            ${PRIORITY_BORDER_STYLES[num]} ${PRIORITY_TEXT_STYLES[num]}
+                                            ${PRIORITY_HOVER_BG_STYLES[num]} hover:text-base-200`}
                                         onClick={() => {
                                             setTempPriority(num);
                                             (document.activeElement as HTMLElement).blur();

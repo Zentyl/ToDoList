@@ -1,23 +1,18 @@
 import { useState, useEffect, useRef } from 'react'
-import TaskItem from './TaskItem';
+import { MoonIcon, SunIcon } from '@heroicons/react/24/outline'
+import {
+  API_URL, PRIORITY_BTN_STYLES, PRIORITY_BORDER_STYLES,
+  PRIORITY_TEXT_STYLES, PRIORITY_HOVER_BG_STYLES
+} from './config/constants';
+import type { Task } from './types'
+import TaskItem from './components/TaskItem';
 import DateTimePicker from 'react-datetime-picker'
 import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
 import 'react-clock/dist/Clock.css';
-import './index.css'
-
-const API_URL = 'http://localhost:3000/tasks';
 
 type DateValue = Date | null;
 type DateRange = DateValue | [DateValue, DateValue];
-
-export interface Task {
-  id: number;
-  text: string;
-  finished: boolean;
-  date: Date | null;
-  priority: number;
-}
 
 function App() {
   const [theme, setTheme] = useState("business");
@@ -149,8 +144,11 @@ function App() {
     <div className="min-h-screen bg-base-200 w-full transition-all duration-300 **:transition-all **:duration-300">
       <div className="min-h-screen max-w-7xl py-8 px-4 mx-auto text-center">
         <div className="absolute top-4 right-4">
-          <button onClick={toggleTheme} className="btn btn-outline btn-secondary">
-            {theme === 'business' ? 'Tryb jasny' : 'Tryb ciemny'}
+          <button onClick={toggleTheme}>
+            {theme === 'business' ?
+              <SunIcon className="size-9 hover:text-yellow-300" />
+              : <MoonIcon className="size-9 hover:text-blue-500" />
+            }
           </button>
         </div>
         <div className="mx-auto flex flex-col items-center max-w-sm">
@@ -167,7 +165,7 @@ function App() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
           />
-          <div className="m-2 flex gap-2">
+          <div className="my-2 flex gap-2">
             Data i godzina wykonania
             <input
               type="checkbox"
@@ -180,12 +178,16 @@ function App() {
             disabled={isDateDisabled}
           />
           <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn btn-outline btn-accent select-none mt-4 px-2 py-1 rounded">Priorytet {priority ?? 1}</div>
+            <div tabIndex={0} role="button"
+              className={`btn btn-outline select-none mt-4 px-3 rounded ${PRIORITY_BTN_STYLES[priority ?? 1]}`}>
+              Priorytet {priority ?? 1}</div>
             <ul tabIndex={-1} className="dropdown-content menu bg-base-100 rounded-box z-1 w-max p-2 shadow-sm">
               {[1, 2, 3, 4].map((num) => (
                 <li key={num}>
                   <a
-                    className="whitespace-nowrap"
+                    className={`whitespace-nowrap border my-1
+                      ${PRIORITY_BORDER_STYLES[num]} ${PRIORITY_TEXT_STYLES[num]}
+                      ${PRIORITY_HOVER_BG_STYLES[num]} hover:text-base-200`}
                     onClick={() => {
                       setPriority(num);
                       (document.activeElement as HTMLElement).blur();
@@ -245,7 +247,7 @@ function App() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   )
 };
 
