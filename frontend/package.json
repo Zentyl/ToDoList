@@ -1,5 +1,5 @@
 {
-  "name": "To-Do List",
+  "name": "to-do-list",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -15,6 +15,7 @@
     "react-calendar": "^5.1.0",
     "react-datetime-picker": "^6.0.1",
     "react-dom": "^19.2.0",
+    "react-router-dom": "^7.13.0",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
