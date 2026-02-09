@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller("tasks")
@@ -14,18 +14,18 @@ export class AppController {
   createTask(
     @Body("text") text: string,
     @Body("priority") priority: number,
-    @Body("date") date: Date) {
-    const taskDate = date;
-    return this.appService.createTask(text, taskDate, priority);
+    @Body("date") date: Date
+  ) {
+    return this.appService.createTask(text, date, priority);
   }
 
   @Patch(":id")
-  updateTask(@Param("id") id: string, @Body() body: any) {
+  updateTask(@Param("id", ParseIntPipe) id: number, @Body() body: any) {
     return this.appService.updateTask(Number(id), body);
   }
 
   @Delete(":id")
-  deleteTask(@Param("id") id: string) {
+  deleteTask(@Param("id", ParseIntPipe) id: number) {
     return this.appService.deleteTask(Number(id));
   }
 }

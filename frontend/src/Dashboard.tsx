@@ -14,7 +14,6 @@ type DateValue = Date | null;
 type DateRange = DateValue | [DateValue, DateValue];
 
 function Dashboard() {
-  const [theme, setTheme] = useState("business");
   const [isDateDisabled, setIsDateDisabled] = useState(false);
   const [dateValue, onChangeDate] = useState<DateRange>(new Date());
   const [inputValue, setInputValue] = useState("");
@@ -24,13 +23,9 @@ function Dashboard() {
   const newTaskInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    document.querySelector('html')?.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await fetch(API_URL);
+        const response = await fetch(`${API_URL}/tasks`);
         const data = await response.json();
         setTasks(data);
       } catch (error) {
@@ -44,15 +39,11 @@ function Dashboard() {
     adjustNewTaskInputHeight();
   }, [inputValue]);
 
-  const toggleTheme = () => {
-    setTheme(prev => prev === "business" ? "light" : "business");
-  };
-
   const createTask = async () => {
     if (inputValue.trim() === "") return;
 
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(`${API_URL}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -108,7 +99,7 @@ function Dashboard() {
     if (newText.trim() === "") return;
 
     try {
-      await fetch(`${API_URL}/${id}`, {
+      await fetch(`${API_URL}/tasks/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -130,7 +121,7 @@ function Dashboard() {
 
   const deleteTask = async (id: number) => {
     try {
-      await fetch(`${API_URL}/${id}`, {
+      await fetch(`${API_URL}/tasks/${id}`, {
         method: 'DELETE',
       });
       setTasks(prev => prev.filter(item => item.id !== id));

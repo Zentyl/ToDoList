@@ -1,4 +1,4 @@
-export const API_URL = 'http://localhost:3000/tasks';
+export const API_URL = 'http://localhost:3000';
 
 export const PRIORITY_BTN_STYLES: Record<number, string> = {
     1: "btn-accent",
