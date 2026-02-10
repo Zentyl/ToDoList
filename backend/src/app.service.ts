@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Task } from './task.entity';
 import { Account } from './account.entity'
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class AppService {
     private taskRepository: Repository<Task>,
     @InjectRepository(Account)
     private accountRepository: Repository<Account>,
+    private jwtService: JwtService,
   ) { }
 
   getAllTasks(): Promise<Task[]> {
@@ -53,5 +55,19 @@ export class AppService {
 
     const newAccount = this.accountRepository.create({ login, password: hashedPassword, email });
     return this.accountRepository.save(newAccount);
+  }
+
+  async login(login: string, passwordPlain: string) {
+    const user = await this.accountRepository.findOne({ where: {login}});
+
+    if (!user || !(await bcrypt.compare(passwordPlain, user.password))) {
+      throw new Error('Nieprawidłowy login lub hasło');
+    }
+
+    const payload = { sub: user.id, username: user.login };
+
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+    }
   }
 }

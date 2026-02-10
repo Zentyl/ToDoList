@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
+import { AuthGuard } from './auth.guard';
 
 @Controller("tasks")
 export class AppController {
   constructor(private readonly appService: AppService) { }
 
+  @UseGuards(AuthGuard)
   @Get()
   getTasks() {
     return this.appService.getAllTasks();

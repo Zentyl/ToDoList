@@ -13,4 +13,12 @@ export class AuthController {
     ) {
         return this.appService.createAccount(login, password, email);
     }
+
+    @Post('login')
+    login(
+        @Body('login') login: string,
+        @Body('password') password: string
+    ) {
+        return this.appService.login(login, password);
+    }
 }

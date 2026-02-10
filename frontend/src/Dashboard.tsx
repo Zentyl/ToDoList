@@ -3,6 +3,7 @@ import {
   API_URL, PRIORITY_BTN_STYLES, PRIORITY_BORDER_STYLES,
   PRIORITY_TEXT_STYLES, PRIORITY_HOVER_BG_STYLES
 } from './config/constants';
+import { useNavigate } from 'react-router-dom';
 import type { Task } from './types'
 import TaskItem from './components/TaskItem';
 import DateTimePicker from 'react-datetime-picker'
@@ -14,6 +15,7 @@ type DateValue = Date | null;
 type DateRange = DateValue | [DateValue, DateValue];
 
 function Dashboard() {
+  const [isLoading, setIsLoading] = useState(true);
   const [isDateDisabled, setIsDateDisabled] = useState(false);
   const [dateValue, onChangeDate] = useState<DateRange>(new Date());
   const [inputValue, setInputValue] = useState("");
@@ -21,19 +23,47 @@ function Dashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [editingIds, setEditingIds] = useState<number[]>([]);
   const newTaskInputRef = useRef<HTMLTextAreaElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
     const fetchTasks = async () => {
       try {
-        const response = await fetch(`${API_URL}/tasks`);
+        const response = await fetch(`${API_URL}/tasks`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.status === 401) {
+          console.error("Sesja wygasła. Zaloguj się ponownie.");
+          localStorage.removeItem('token');
+          navigate('/login');
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(`Błąd HTTP: ${response.status}`);
+        }
+
         const data = await response.json();
         setTasks(data);
       } catch (error) {
-        console.error("Błąd pobierania: ", error);
+        console.error("Błąd pobierania zadań: ", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchTasks();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     adjustNewTaskInputHeight();
@@ -130,9 +160,26 @@ function Dashboard() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="mx-auto flex flex-col items-center max-w-sm">
+        <button className="btn btn-error btn-outline absolute top-4 left-4"
+          onClick={handleLogout}>
+          Wyloguj
+        </button>
         <h1 className="text-4xl mb-4">To-Do List</h1>
         <label className="text-lg flex flex-col">
           Dodaj zadanie

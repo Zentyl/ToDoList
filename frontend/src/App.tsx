@@ -3,6 +3,7 @@ import { MoonIcon, SunIcon } from '@heroicons/react/24/outline'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from './Dashboard'
 import Register from './Register'
+import Login from './Login'
 
 function App() {
     const [theme, setTheme] = useState("business");
@@ -39,6 +40,7 @@ function App() {
                     <Routes>
                         <Route path="/" element={<Dashboard />} />
                         <Route path="/register" element={<Register />} />
+                        <Route path="/login" element={<Login />} />
                     </Routes>
                 </div>
             </div>
