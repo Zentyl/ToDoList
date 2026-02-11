@@ -5,3 +5,9 @@ export interface Task {
     date: Date | null;
     priority: number;
 }
+
+export interface NestErrorResponse {
+  statusCode: number;
+  message: string | string[];
+  error: string;
+}

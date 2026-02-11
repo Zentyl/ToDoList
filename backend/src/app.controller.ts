@@ -1,12 +1,12 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
-import { AuthGuard } from './auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller("tasks")
 export class AppController {
   constructor(private readonly appService: AppService) { }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   @Get()
   getTasks() {
     return this.appService.getAllTasks();

@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import {
-  API_URL, PRIORITY_BTN_STYLES, PRIORITY_BORDER_STYLES,
+  PRIORITY_BTN_STYLES, PRIORITY_BORDER_STYLES,
   PRIORITY_TEXT_STYLES, PRIORITY_HOVER_BG_STYLES
 } from './config/constants';
 import { useNavigate } from 'react-router-dom';
+import api from './api/axios';
 import type { Task } from './types'
 import TaskItem from './components/TaskItem';
 import DateTimePicker from 'react-datetime-picker'
@@ -26,36 +27,16 @@ function Dashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
 
-    if (!token) {
+    if (!localStorage.getItem('token')) {
       navigate('/login');
       return;
     }
 
     const fetchTasks = async () => {
       try {
-        const response = await fetch(`${API_URL}/tasks`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (response.status === 401) {
-          console.error("Sesja wygasła. Zaloguj się ponownie.");
-          localStorage.removeItem('token');
-          navigate('/login');
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error(`Błąd HTTP: ${response.status}`);
-        }
-
-        const data = await response.json();
-        setTasks(data);
+        const response = await api.get('/tasks');
+        setTasks(response.data);
       } catch (error) {
         console.error("Błąd pobierania zadań: ", error);
       } finally {
@@ -73,40 +54,35 @@ function Dashboard() {
     if (inputValue.trim() === "") return;
 
     try {
-      const response = await fetch(`${API_URL}/tasks`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: inputValue,
-          date: isDateDisabled ? null : dateValue,
-          priority: priority ?? 1
-        }),
+      const response = await api.post('/tasks', {
+        text: inputValue,
+        date: isDateDisabled ? null : dateValue,
+        priority: priority ?? 1
       });
 
-      const newTask = await response.json();
-      setTasks(prev => [...prev, newTask]);
+      setTasks(prev => [...prev, response.data]);
       setInputValue("");
     } catch (error) {
       console.error("Nie udało się dodać zadania", error);
     }
   };
 
-
   const toggleFinished = async (id: number) => {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
 
+    const oldTasks = [...tasks];
+    setTasks(prev =>
+      prev.map(
+        t => t.id === id ? { ...t, finished: !t.finished } : t
+      )
+    );
+
     try {
-      await fetch(`${API_URL}/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ finished: !task.finished }),
-      });
-      setTasks(prev =>
-        prev.map(
-          t => t.id === id ? { ...t, finished: !t.finished } : t));
+      await api.patch(`/tasks/${id}`, { finished: !task.finished });
     } catch (error) {
       console.error("Błąd aktualizacji statusu", error);
+      setTasks(oldTasks);
     }
   };
 
@@ -129,15 +105,12 @@ function Dashboard() {
     if (newText.trim() === "") return;
 
     try {
-      await fetch(`${API_URL}/tasks/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: newText,
-          date: newDate,
-          priority: priority
-        }),
+      await api.patch(`/tasks/${id}`, {
+        text: newText,
+        date: newDate,
+        priority: priority
       });
+
       setTasks(prev =>
         prev.map(task =>
           task.id === id ? { ...task, text: newText, date: newDate, priority: priority } : task
@@ -150,13 +123,14 @@ function Dashboard() {
   };
 
   const deleteTask = async (id: number) => {
+    const oldTasks = [...tasks];
+    setTasks(prev => prev.filter(item => item.id !== id));
+
     try {
-      await fetch(`${API_URL}/tasks/${id}`, {
-        method: 'DELETE',
-      });
-      setTasks(prev => prev.filter(item => item.id !== id));
+      await api.delete(`/tasks/${id}`);
     } catch (error) {
       console.error("Błąd usuwania", error);
+      setTasks(oldTasks);
     }
   };
 
@@ -176,10 +150,18 @@ function Dashboard() {
   return (
     <>
       <div className="mx-auto flex flex-col items-center max-w-sm">
-        <button className="btn btn-error btn-outline absolute top-4 left-4"
-          onClick={handleLogout}>
-          Wyloguj
-        </button>
+        <div className="absolute flex flex-col top-4 left-4">
+          <button className="btn btn-error btn-outline mb-2"
+            onClick={handleLogout}>
+            Wyloguj
+          </button>
+          <a
+            href={`http://localhost:3000/tasks?token=${localStorage.getItem('token')}`}
+            rel="noopener noreferrer"
+            className="btn btn-warning btn-outline">
+            API
+          </a>
+        </div>
         <h1 className="text-4xl mb-4">To-Do List</h1>
         <label className="text-lg flex flex-col">
           Dodaj zadanie

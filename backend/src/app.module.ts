@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
-import { AuthController } from './auth.controller';
+import { AuthController } from './auth/auth.controller';
 import { AppService } from './app.service';
 import { Task } from './task.entity';
 import { Account } from './account.entity';
+import { JwtStrategy } from './auth/jwt.strategy';
 
 @Module({
   imports: [
@@ -17,7 +19,9 @@ import { Account } from './account.entity';
     }),
     TypeOrmModule.forFeature([Task, Account]),
 
-  JwtModule.register({
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+
+    JwtModule.register({
       global: true,
       secret: 'tajne_haslo',
       signOptions: { expiresIn: '1h' },
@@ -27,6 +31,9 @@ import { Account } from './account.entity';
     AppController,
     AuthController
   ],
-  providers: [AppService],
+  providers: [
+    AppService,
+    JwtStrategy
+  ],
 })
 export class AppModule { }

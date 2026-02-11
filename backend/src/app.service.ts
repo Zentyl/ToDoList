@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Task } from './task.entity';
@@ -46,7 +46,7 @@ export class AppService {
     });
 
     if (existingUser) {
-      throw new Error('Użytkownik o takim loginie lub emailu już istnieje!');
+      throw new ConflictException('Użytkownik o takim loginie lub e-mailu już istnieje!');
     }
 
     const saltRounds = 10;
@@ -61,7 +61,7 @@ export class AppService {
     const user = await this.accountRepository.findOne({ where: {login}});
 
     if (!user || !(await bcrypt.compare(passwordPlain, user.password))) {
-      throw new Error('Nieprawidłowy login lub hasło');
+      throw new UnauthorizedException('Nieprawidłowy login lub hasło!');
     }
 
     const payload = { sub: user.id, username: user.login };
