@@ -4,9 +4,14 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AuthController } from './auth/auth.controller';
+import { AuthService } from './auth/auth.service';
 import { AppService } from './app.service';
-import { Task } from './task.entity';
-import { User } from './user.entity';
+import { TaskService } from './task/task.service';
+import { TaskController } from './task/task.controller';
+import { UserService } from './user/user.service';
+import { UserController } from './user/user.controller';
+import { Task } from './task/task.entity';
+import { User } from './user/user.entity';
 import { JwtStrategy } from './auth/jwt.strategy';
 
 @Module({
@@ -29,11 +34,16 @@ import { JwtStrategy } from './auth/jwt.strategy';
   ],
   controllers: [
     AppController,
-    AuthController
+    AuthController,
+    TaskController,
+    UserController,
   ],
   providers: [
     AppService,
-    JwtStrategy
+    JwtStrategy,
+    AuthService,
+    UserService,
+    TaskService,
   ],
 })
 export class AppModule { }
