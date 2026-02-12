@@ -2,7 +2,7 @@ import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/co
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Task } from './task.entity';
-import { Account } from './account.entity'
+import { User } from './user.entity'
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
@@ -11,8 +11,8 @@ export class AppService {
   constructor(
     @InjectRepository(Task)
     private taskRepository: Repository<Task>,
-    @InjectRepository(Account)
-    private accountRepository: Repository<Account>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     private jwtService: JwtService,
   ) { }
 
@@ -33,12 +33,12 @@ export class AppService {
     await this.taskRepository.delete(id);
   }
 
-  getAllAccounts(): Promise<Account[]> {
-    return this.accountRepository.find();
+  getAllUsers(): Promise<User[]> {
+    return this.userRepository.find();
   }
 
-  async createAccount(login: string, passwordPlain: string, email: string): Promise<Account> {
-    const existingUser = await this.accountRepository.findOne({
+  async createUser(login: string, passwordPlain: string, email: string): Promise<User> {
+    const existingUser = await this.userRepository.findOne({
       where: [
         { login: login },
         { email: email }
@@ -53,12 +53,20 @@ export class AppService {
 
     const hashedPassword = await bcrypt.hash(passwordPlain, saltRounds);
 
-    const newAccount = this.accountRepository.create({ login, password: hashedPassword, email });
-    return this.accountRepository.save(newAccount);
+    const newUser = this.userRepository.create({ login, password: hashedPassword, email });
+    return this.userRepository.save(newUser);
+  }
+
+  async updateUser(id: number, updates: Partial<User>): Promise<void> {
+    await this.userRepository.update(id, updates);
+  }
+
+  async deleteUser(id: number): Promise<void> {
+    await this.userRepository.delete(id);
   }
 
   async login(login: string, passwordPlain: string) {
-    const user = await this.accountRepository.findOne({ where: {login}});
+    const user = await this.userRepository.findOne({ where: { login } });
 
     if (!user || !(await bcrypt.compare(passwordPlain, user.password))) {
       throw new UnauthorizedException('Nieprawidłowy login lub hasło!');
@@ -70,4 +78,5 @@ export class AppService {
       access_token: await this.jwtService.signAsync(payload),
     }
   }
+
 }

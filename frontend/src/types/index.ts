@@ -11,3 +11,8 @@ export interface NestErrorResponse {
   message: string | string[];
   error: string;
 }
+export interface User {
+  id: number;
+  login: string;
+  email: string;
+}

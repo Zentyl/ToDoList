@@ -2,17 +2,17 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGua
 import { AppService } from './app.service';
 import { AuthGuard } from '@nestjs/passport';
 
-@Controller("tasks")
+@Controller()
 export class AppController {
   constructor(private readonly appService: AppService) { }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get()
+  @Get('tasks')
   getTasks() {
     return this.appService.getAllTasks();
   }
 
-  @Post()
+  @Post('tasks')
   createTask(
     @Body("text") text: string,
     @Body("priority") priority: number,
@@ -21,13 +21,29 @@ export class AppController {
     return this.appService.createTask(text, date, priority);
   }
 
-  @Patch(":id")
+  @Patch("tasks/:id")
   updateTask(@Param("id", ParseIntPipe) id: number, @Body() body: any) {
     return this.appService.updateTask(Number(id), body);
   }
 
-  @Delete(":id")
+  @Delete("tasks/:id")
   deleteTask(@Param("id", ParseIntPipe) id: number) {
     return this.appService.deleteTask(Number(id));
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('users')
+  async getAllUsers() {
+    return this.appService.getAllUsers();
+  }
+
+  @Patch('users/:id')
+  async updateUser(@Param('id') id: string, @Body() body: any) {
+    return this.appService.updateUser(+id, body);
+  }
+
+  @Delete('users/:id')
+  async deleteUser(@Param('id') id: string) {
+    return this.appService.deleteUser(+id);
   }
 }

@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from './Dashboard'
 import Register from './Register'
 import Login from './Login'
+import AdminPanel from './AdminPanel'
 
 function App() {
     const [theme, setTheme] = useState("business");
@@ -41,6 +42,7 @@ function App() {
                         <Route path="/" element={<Dashboard />} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/login" element={<Login />} />
+                        <Route path="/admin" element={<AdminPanel />} />
                     </Routes>
                 </div>
             </div>

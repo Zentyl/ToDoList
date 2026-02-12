@@ -6,7 +6,7 @@ import { AppController } from './app.controller';
 import { AuthController } from './auth/auth.controller';
 import { AppService } from './app.service';
 import { Task } from './task.entity';
-import { Account } from './account.entity';
+import { User } from './user.entity';
 import { JwtStrategy } from './auth/jwt.strategy';
 
 @Module({
@@ -14,10 +14,10 @@ import { JwtStrategy } from './auth/jwt.strategy';
     TypeOrmModule.forRoot({
       type: "sqlite",
       database: "db.sqlite",
-      entities: [Task, Account],
+      entities: [Task, User],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([Task, Account]),
+    TypeOrmModule.forFeature([Task, User]),
 
     PassportModule.register({ defaultStrategy: 'jwt' }),
 
