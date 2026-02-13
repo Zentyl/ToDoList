@@ -15,6 +15,9 @@ export class User {
     @Column()
     email: string;
 
+    @Column({ default: 'user' })
+    role: string;
+
     @OneToMany(() => Task, (task) => task.user)
     tasks: Task[];
 }

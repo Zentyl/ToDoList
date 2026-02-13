@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from "jwt-decode";
 import api from './api/axios';
 import type { User } from './types';
 import UserItem from './components/UserItem';
+
+interface TokenPayload {
+    sub: number;
+    username: string;
+    role: string;
+}
 
 function AdminPanel() {
     const [isLoading, setIsLoading] = useState(true);
@@ -11,7 +18,21 @@ function AdminPanel() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!localStorage.getItem('token')) {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+
+        try {
+            const decoded = jwtDecode<TokenPayload>(token);
+
+            if (decoded.role !== 'admin') {
+                navigate('/');
+                return;
+            }
+        } catch (error) {
+            localStorage.removeItem('token');
             navigate('/login');
             return;
         }
