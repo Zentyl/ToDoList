@@ -52,15 +52,16 @@ function AdminPanel() {
         fetchUsers();
     }, [navigate]);
 
-    const editUser = async (id: number, newLogin: string, newEmail: string) => {
+    const editUser = async (id: number, newLogin: string, newPassword: string, newEmail: string) => {
         const originalUsers = [...users];
         setUsers(prev => prev.map(u =>
-            u.id === id ? { ...u, login: newLogin, email: newEmail } : u
+            u.id === id ? { ...u, login: newLogin, password: newPassword, email: newEmail } : u
         ));
 
         try {
             await api.patch(`/users/${id}`, {
                 login: newLogin,
+                password: newPassword,
                 email: newEmail
             });
         } catch (error) {
