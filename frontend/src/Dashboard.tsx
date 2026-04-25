@@ -17,7 +17,7 @@ type DateRange = DateValue | [DateValue, DateValue];
 
 function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
-  const [isDateDisabled, setIsDateDisabled] = useState(false);
+  const [isDateEnabled, setIsDateEnabled] = useState(false);
   const [dateValue, onChangeDate] = useState<DateRange>(new Date());
   const [inputValue, setInputValue] = useState("");
   const [priority, setPriority] = useState<number | null>(null);
@@ -56,7 +56,7 @@ function Dashboard() {
     try {
       const response = await api.post('/tasks', {
         text: inputValue,
-        date: isDateDisabled ? null : dateValue,
+        date: isDateEnabled ? dateValue : null,
         priority: priority ?? 1
       });
 
@@ -179,13 +179,14 @@ function Dashboard() {
           Data i godzina wykonania
           <input
             type="checkbox"
-            onChange={(e) => setIsDateDisabled(e.target.checked)}
+            checked={isDateEnabled}
+            onChange={(e) => setIsDateEnabled(e.target.checked)}
           >
           </input>
         </div>
         <DateTimePicker onChange={onChangeDate} id="datePicker" value={dateValue}
           disableClock format="dd.MM.y HH:mm" openWidgetsOnFocus={false}
-          disabled={isDateDisabled}
+          disabled={isDateEnabled}
         />
         <div className="dropdown">
           <div tabIndex={0} role="button"
