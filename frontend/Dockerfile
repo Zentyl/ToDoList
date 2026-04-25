@@ -1,19 +1,14 @@
-FROM node:22-alpine AS development
-
+FROM node:22-alpine AS base
 WORKDIR /app
-
 COPY package*.json ./
 RUN npm install
 
+FROM base AS development
+COPY . .
 EXPOSE 5173
-
 CMD ["npm", "run", "dev"]
 
-
-FROM node:22-alpine AS build
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
+FROM base AS build
 COPY . .
 RUN npm run build 
 
