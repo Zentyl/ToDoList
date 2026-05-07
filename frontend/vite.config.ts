@@ -7,6 +7,7 @@ export default defineConfig({
     tailwindcss(),
     react()
   ],
+  base: '/ToDoList/',
   server: {
     watch: {
       usePolling: true,
