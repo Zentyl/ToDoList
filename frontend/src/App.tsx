@@ -24,7 +24,7 @@ function App() {
         setTheme(prev => prev === "business" ? "light" : "business");
     };
     return (
-        <BrowserRouter>
+        <BrowserRouter basename="/ToDoList">
             <div className={
                 `min-h-screen w-full transition-all duration-300 **:transition-all **:duration-300
       ${theme === 'business' ? 'bg-base-200' : 'bg-base-100'}`
